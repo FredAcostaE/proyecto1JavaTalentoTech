@@ -10,35 +10,41 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.talentotech2.enviroment.model.User;
+import com.talentotech2.enviroment.dto.LoginRequest;
+import com.talentotech2.enviroment.service.UserService;
 import com.talentotech2.enviroment.repository.UserRepository;
+import com.talentotech2.enviroment.service.UserService;
+
 import org.springframework.web.server.ResponseStatusException; //librerias para mostrar mensaje de error exception
 import org.springframework.http.HttpStatus; //librerias para mostrar mensaje de error exception
+import org.springframework.http.ResponseEntity;
 
 @RestController//Api para tener peticiones
 @RequestMapping("/api/users") //Para mapear una ruta
 
 public class UserController {
-    private final UserRepository userRepository; //Instanciando interfaz
-    public UserController(UserRepository userRepository){
-    this.userRepository = userRepository;
+    private final UserService userService;
+    public UserController(UserService userService){
+    this.userService = userService;
     }
 
     //Método usado para guardar usuario
     @PostMapping
-    public User create(@RequestBody User user){
-        return userRepository.save(user);
+    public ResponseEntity<User> create(@RequestBody User user){
+        return ResponseEntity.status(HttpStatus.CREATED)
+        .body(userService.crearUsuario(user));
     }
     //Método para consultar
     @GetMapping
     public List<User> findAll(){
-        return userRepository.findAll();
+        return userService.findAll();
     }
 
     //Creando un nuevo servicio para consultar usuario por id
     // READ BY ID
     @GetMapping("/{id}") //Trae la ruta especificada en RequestMapping y busca por id
     public User findByID(@PathVariable Long id){
-        return userRepository.findById(id)
+        return userService.findById(id)
         .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
     }
 
@@ -46,9 +52,16 @@ public class UserController {
     //UPDATE
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody User userDetails) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        user.setUsername(userDetails.getUsername());
-        user.setEmail(userDetails.getEmail());
-        return userRepository.save(user);
+      
+         
+        return userService.update(id, userDetails);
     }   
+
+    @PostMapping("/login") //DECORADOR QUE TRAE LA URL
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        //TODO: process POST request
+        String response = userService.login(request);                
+        return ResponseEntity.ok(response);
+    }
+    
 }

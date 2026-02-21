@@ -3,6 +3,12 @@ spring:
     url: jdbc:postgresql://localhost:5432/energia_db
     username: postgres
     password: negro31644
+
+  security:
+      user:
+        name: admin
+        password: 1234
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -15,3 +21,4 @@ server:
   port: 8080
   error:
     include-message: always
+    
